@@ -39,22 +39,24 @@ TELEGRAM_TOKEN = "機器人Token填在這裡"
 TELEGRAM_CHAT_ID = "個人ChatID填在這裡"
 
 ```
-步驟 1：切換至專案所在目錄
+### 步驟 1：切換至專案所在目錄
 請根據電腦中專案資料夾的真實路徑進行切換（以路徑在桌面為例）：
 
 Bash
 cd Desktop/crypto_project
-步驟 2：一鍵安裝所有必要 Python 套件
+
+### 步驟 2：一鍵安裝所有必要 Python 套件
 讓系統自動讀取環境清單，安裝強化學習（Stable-Baselines3）與交易所協議（CCXT）等依賴套件：
 
 Bash
 pip install -r requirements.txt
-步驟 3：初始化 SQLite 歷史資料庫
+
+### 步驟 3：初始化 SQLite 歷史資料庫
 直接連線交易所 API 撈取實體真數據，在本地生成 crypto_market_data.db 資料庫檔案：
 Bash
 python fetch_real_data.py
 
-步驟 4：選擇模式執行主程式 (二選一)
+### 步驟 4：選擇模式執行主程式 (二選一)
 模式 A：運行歷史回測
 載入訓練好的神經網路權重模型，對歷史數據進行離線樣本外 blind test 回放盲測：
 
@@ -66,7 +68,7 @@ python main.py
 Bash
 python main_live.py
 
-步驟 5：啟動網頁數據監控儀表板
+### 步驟 5：啟動網頁數據監控儀表板
 請另外打開一個全新的 CMD 視窗，同樣 cd 進入專案資料夾後執行以下指令，即可直觀觀看策略收斂圓餅圖與事件日誌：
 
 Bash
