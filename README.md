@@ -64,7 +64,8 @@ python fetch_real_data.py
 
 Bash
 python main.py
-模式 B：開啟「實時線上秒級風控預警」
+
+模式 B：開啟實時線上秒級風控預警
 直接連線幣安（Binance）交易所期貨實體 API。系統將每 10 秒進行一次秒級截面掃描，一旦特徵穿透 2.2% 剛性閥門，將即時喚醒 Ollama 大模型解算並直接推播 Telegram 實戰戰報（按 Ctrl + C 可安全關閉）：
 
 Bash
