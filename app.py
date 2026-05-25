@@ -1,4 +1,3 @@
-# app.py
 import streamlit as pd_st
 import sqlite3
 import pandas as pd
@@ -10,7 +9,7 @@ pd_st.set_page_config(page_title="Crypto Agent 監控儀表板", layout="wide")
 pd_st.title("📊 基於強化學習之加密貨幣異動通報優化系統")
 pd_st.subheader("系統即時狀態儀表板")
 
-pd_st.success("🟢 當前監控環境：【實驗組】Binance 交易所實體合約數據 (CCXT 即時同步)")
+pd_st.success("🟢 當前監控環境：Binance 交易所實體合約數據 (CCXT 即時同步)")
 
 # 連線資料庫讀取數據
 try:

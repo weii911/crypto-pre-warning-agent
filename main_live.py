@@ -1,4 +1,3 @@
-# main_live.py
 import time
 import os
 import datetime

@@ -1,4 +1,3 @@
-# fetch_real_data.py
 import ccxt
 import sqlite3
 import pandas as pd
