@@ -10,26 +10,35 @@ import config
 def fetch_live_state(symbol="BTC/USDT:USDT"):
     exchange = ccxt.binance({'options': {'defaultType': 'future'}, 'enableRateLimit': True})
     try:
+        #4H 8DAYS
         ohlcv_4h = exchange.fetch_ohlcv(symbol, timeframe='4h', limit=20)
+        #1D 30DAYS
         ohlcv_1d = exchange.fetch_ohlcv(symbol, timeframe='1d', limit=30)
         
+        #日線正規化
         prices_1d = [c[4] for c in ohlcv_1d]
         current_price = prices_1d[-1]
         htf_price_position = (current_price - min(prices_1d)) / (max(prices_1d) - min(prices_1d)) if max(prices_1d) != min(prices_1d) else 0.5
-        
+                
         last_candle = ohlcv_4h[-1]
         open_p, close_p, volume = last_candle[1], last_candle[4], last_candle[5]
+        
+        #漲跌幅
         price_change = (close_p - open_p) / open_p
         
+        #4H正規化
         prices_4h = [c[4] for c in ohlcv_4h]
         price_position = (close_p - min(prices_4h)) / (max(prices_4h) - min(prices_4h)) if max(prices_4h) != min(prices_4h) else 0.5
         
+        #計算交易量是平常幾倍
         avg_vol = sum([c[5] for c in ohlcv_4h[-6:-1]]) / 5
         volume_pump = volume / avg_vol if avg_vol > 0 else 1.0
         
+        #合約增加量
         oi_rate = abs(price_change) * 0.5 + (volume_pump * 0.02)
         orderbook_delta = volume * price_change * 0.1
         
+        #當下K
         direction = "🟢 多頭趨勢" if price_change >= 0.012 else "🔴 空頭趨勢" if price_change <= -0.012 else "🟡 橫盤震盪/主力洗盤"
         is_real_pump = 1 if (volume_pump > 1.8 and oi_rate > 0.02) else 0
         
@@ -47,7 +56,7 @@ def fetch_live_state(symbol="BTC/USDT:USDT"):
             'is_real_pump': is_real_pump
         }
     except Exception as e:
-        print(f"📡 實時數據流採集延遲: {e}")
+        print(f"實時數據流採集延遲: {e}")
         return None
 
 if __name__ == "__main__":
@@ -60,7 +69,7 @@ if __name__ == "__main__":
         print("已成功載入 PPO 神經網路實戰權重。")
         model = PPO.load("best_crypto_agent")
     else:
-        print("未偵測到模型，建立基準防禦模型。")
+        print("未偵測到模型")
         model = None
         
     print(f"\n實時監控已啟動 - 每 10 秒掃描一次幣安實體數據流。\n" + "-" * 80)
@@ -104,9 +113,12 @@ if __name__ == "__main__":
             
             prompt_injection = (
                 f"請對以下加密貨幣實時異常數據進行理性、專業的微觀資金面與籌碼面診斷，以繁體中文（zh-tw）回答。\n"
+                f"【交易邏輯框架限制】：\n"
+                f"1. 請嚴格遵守日線定大局趨勢，4H定微觀入場時機的嵌套分析思路。\n"
+                f"2. 結合宏觀趨勢位置(1D)判斷當前大格局是否安全，再透過價格形態位置(4H)與盤口資金流向(Delta)尋找最優入場點，避免在高位警戒區盲目追多。\n\n"
                 f"【硬性輸出格式鐵律】：您的回答必須嚴格遵守以下格式，不要有環境解釋：\n"
                 f"[微觀資金診斷]\n"
-                f"（請在此處寫下您對數據的籌碼面與訂單流深度分析...）\n\n"
+                f"（請在此處寫下您基於 1D 宏觀趨勢與 4H 微觀位置嵌套後的籌碼面與訂單流深度分析...）\n\n"
                 f"[行動指導結論]\n"
                 f"（請根據分析，為交易員親自撰寫一句話的最終指導，字數40字內，必須明確指出是開多、看空防範、還是空倉觀望。）"
             )

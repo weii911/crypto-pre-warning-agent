@@ -2,7 +2,6 @@ import time
 import os
 import datetime
 import sqlite3
-import re
 import pandas as pd
 from stable_baselines3 import PPO
 from env import CryptoAgentEnv
@@ -69,13 +68,16 @@ if __name__ == "__main__":
                 market_dir = current_data.get('direction', '🟡 橫盤震盪/主力洗盤')
                 
                 prompt_injection = (
-                    f"請對以下加密貨幣異常數據進行理性、專業的微觀資金面與籌碼面診斷，以繁體中文（zh-tw）回答。\n"
-                    f"【硬性輸出格式鐵律】：您的回答必須嚴格遵守以下格式，不要有任何多餘的解釋文字：\n"
+                    f"請對以下加密貨幣實時異常數據進行理性、專業的微觀資金面與籌碼面診斷，以繁體中文（zh-tw）回答。\n"
+                    f"【交易邏輯框架限制】：\n"
+                    f"1. 請嚴格遵守日線定大局趨勢，4H定微觀入場時機的嵌套分析思路。\n"
+                    f"2. 結合宏觀趨勢位置(1D)判斷當前大格局是否安全，再透過價格形態位置(4H)與盤口資金流向(Delta)尋找最優入場點，避免在高位警戒區盲目追多。\n\n"
+                    f"【硬性輸出格式鐵律】：您的回答必須嚴格遵守以下格式，不要有環境解釋：\n"
                     f"[微觀資金診斷]\n"
-                    f"（請在此處寫下您對數據的籌碼面與訂單流深度分析...）\n\n"
+                    f"（請在此處寫下您基於 1D 宏觀趨勢與 4H 微觀位置嵌套後的籌碼面與訂單流深度分析...）\n\n"
                     f"[行動指導結論]\n"
                     f"（請根據分析，為交易員親自撰寫一句話的最終指導，字數40字內，必須明確指出是開多、看空防範、還是空倉觀望。）"
-                )
+                 )
                 
                 llm_response = tools.call_local_ollama(
                     coin_name=f"{ticker} ({market_dir}) -> {prompt_injection}", 

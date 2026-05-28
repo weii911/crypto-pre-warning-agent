@@ -67,7 +67,7 @@ if not df.empty:
     left_col, right_col = pd_st.columns(2)
     
     with left_col:
-        pd_st.markdown("###強化學習 Agent 決策權重比例")
+        pd_st.markdown("### 強化學習 Agent 決策權重比例")
         action_counts = pd.DataFrame({
             '決策動作': ['Level 0 靜默監控', 'Level 1 輿情探測', 'Level 2 深度通報'],
             '觸發次數': [total_data - action_1_count - action_2_count, action_1_count, action_2_count]
@@ -82,7 +82,7 @@ if not df.empty:
         pd_st.plotly_chart(fig_pie, width="stretch")
         
     with right_col:
-        pd_st.markdown("###系統實時通報事件日誌")
+        pd_st.markdown("### 系統實時通報事件日誌")
         
         target_cols = ['timestamp', 'ticker', 'oi_rate', 'volume_pump']
         display_cols = ['時間軸', '代幣', '持倉暴增率', '成交量放大']

@@ -11,7 +11,6 @@ def call_local_ollama(coin_name, oi_rate, volume_pump, price_position, orderbook
     delta_desc = f"主動買盤極度強勁 (Delta: +{orderbook_delta:.1f})" if orderbook_delta > 0 else \
                  f"主力暗中大單拋售出貨 (Delta: {orderbook_delta:.1f})"
     
-    # 打造高專業度的量化分析 Prompt
     prompt = (
         f"你是一名專精於加密貨幣鏈上數據與盤口微觀結構的頂尖量化交易員。\n"
         f"請針對以下突發異動數據，進行多因子交叉驗證，並給出具體的莊家意圖核心診斷(限制 80 字內，一針見血，不說廢話)：\n\n"

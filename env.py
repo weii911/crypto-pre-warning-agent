@@ -10,10 +10,7 @@ class CryptoAgentEnv(gym.Env):
         super(CryptoAgentEnv, self).__init__()
         
         conn = sqlite3.connect(config.DB_REAL)
-        try:
-            self.df = pd.read_sql_query("SELECT * FROM market_data_2026", conn)
-        except Exception:
-            self.df = pd.read_sql_query("SELECT * FROM market_data", conn)
+        self.df = pd.read_sql_query("SELECT * FROM market_data_2025", conn)
         conn.close()
         
         self.current_step = 0
