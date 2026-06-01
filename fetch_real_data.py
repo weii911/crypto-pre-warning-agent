@@ -11,7 +11,7 @@ def fetch_year_data(symbol, year):
         end_timestamp = 1767225600000  # 2026-01-01 00:00:00
     elif year == 2026:
         start_since = 1767225600000  # 2026-01-01 00:00:00
-        end_timestamp = int(time.time() * 1000)  # 現在此時此刻
+        end_timestamp = int(time.time() * 1000)  # 執行日
         
     print(f"[CCXT] 正在連接交易所，撈取 {symbol} 的 {year} 年度歷史大數據...")
     
@@ -21,12 +21,9 @@ def fetch_year_data(symbol, year):
     })
     
     try:
-        # 抓取日線作為宏觀過濾特徵
-        ohlcv_1d = exchange.fetch_ohlcv(symbol, timeframe='1d', limit=30)
-        prices_1d = [c[4] for c in ohlcv_1d]
-        min_1d, max_1d = min(prices_1d), max(prices_1d)
-        current_1d_price = prices_1d[-1]
-        htf_price_position = (current_1d_price - min_1d) / (max_1d - min_1d) if max_1d != min_1d else 0.5
+        ohlcv_1d = exchange.fetch_ohlcv(symbol, timeframe='1d', since=start_since, limit=365)
+        df_1d = pd.DataFrame(ohlcv_1d, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        df_1d['date'] = pd.to_datetime(df_1d['timestamp'], unit='ms').dt.date
 
         all_ohlcv_4h = []
         current_since = start_since
@@ -36,7 +33,6 @@ def fetch_year_data(symbol, year):
             if not partial_candles:
                 break
                 
-            # 嚴格控制不要抓到超出年份的數據
             if partial_candles[-1][0] > end_timestamp:
                 for c in partial_candles:
                     if c[0] <= end_timestamp:
@@ -52,15 +48,32 @@ def fetch_year_data(symbol, year):
         print(f"撈取成功 #{symbol} {year}年 共完整撈取 {len(all_ohlcv_4h)} 根 4H K 線數據。")
         
         parsed_data = []
+        
+        prices_4h_all = [c[4] for c in all_ohlcv_4h]
+        min_4h_global = min(prices_4h_all) if prices_4h_all else 0
+        max_4h_global = max(prices_4h_all) if prices_4h_all else 1
+
         for i, candle in enumerate(all_ohlcv_4h):
-            ts = datetime.datetime.fromtimestamp(candle[0] / 1000).strftime('%Y-%m-%d %H:%M:%S')
+            candle_datetime = datetime.datetime.fromtimestamp(candle[0] / 1000)
+            ts = candle_datetime.strftime('%Y-%m-%d %H:%M:%S')
+            candle_date = candle_datetime.date()
+            
             close_price = candle[4]
             volume = candle[5]
             
-            prices_4h = [c[4] for c in all_ohlcv_4h]
-            min_4h, max_4h = min(prices_4h), max(prices_4h)
-            ltf_price_position = (close_price - min_4h) / (max_4h - min_4h) if max_4h != min_4h else 0.5
+            # 微觀 4H 位置
+            ltf_price_position = (close_price - min_4h_global) / (max_4h_global - min_4h_global) if max_4h_global != min_4h_global else 0.5
             
+            history_1d = df_1d[df_1d['date'] <= candle_date]
+            if not history_1d.empty:
+                min_1d = history_1d['low'].min()
+                max_1d = history_1d['high'].max()
+            else:
+                min_1d, max_1d = close_price, close_price
+                
+            htf_calc = (close_price - min_1d) / (max_1d - min_1d) if max_1d != min_1d else 0.5
+            htf_price_position = max(0.0, min(1.0, htf_calc))
+
             if i >= 5:
                 avg_vol = sum([c[5] for c in all_ohlcv_4h[i-5:i]]) / 5
                 vol_pump = volume / avg_vol if avg_vol > 0 else 1.0
@@ -87,15 +100,15 @@ def fetch_year_data(symbol, year):
             parsed_data.append({
                 'timestamp': ts,
                 'ticker': symbol.split('/')[0],
-                'price': close_price,                       
+                'price': close_price,                                      
                 'oi_rate': oi_rate,
                 'volume_pump': vol_pump,
                 'google_trends_proxy': vol_pump * 15.0 + 20.0,
                 'price_position': ltf_price_position,       
-                'htf_price_position': htf_price_position,   
+                'htf_price_position': htf_price_position,
                 'orderbook_delta': orderbook_delta,
                 'price_change': price_change,
-                'direction': direction,                     
+                'direction': direction,                                                     
                 'is_real_pump': is_real_pump
             })
             

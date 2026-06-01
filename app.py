@@ -33,8 +33,8 @@ if not df.empty:
     col1, col2, col3, col4 = pd_st.columns(4)
     col1.metric("📊 歷史巡檢總時數", f"{total_data} 小時")
     col2.metric("🚨 偵測到莊家建倉點", f"{pump_count} 次")
-    col3.metric("🔍 Level 1 輿情探測", f"{action_1_count} 次")
-    col4.metric("🤖 Level 2 深度通報", f"{action_2_count} 次")
+    col3.metric("🔍 Level 1", f"{action_1_count} 次")
+    col4.metric("🤖 Level 2", f"{action_2_count} 次")
     
     pd_st.markdown("---")
     
@@ -69,7 +69,7 @@ if not df.empty:
     with left_col:
         pd_st.markdown("### 強化學習 Agent 決策權重比例")
         action_counts = pd.DataFrame({
-            '決策動作': ['Level 0 靜默監控', 'Level 1 輿情探測', 'Level 2 深度通報'],
+            '決策動作': ['Level 0', 'Level 1', 'Level 2'],
             '觸發次數': [total_data - action_1_count - action_2_count, action_1_count, action_2_count]
         })
         fig_pie = px.pie(
