@@ -37,6 +37,10 @@ class Crypto2025TrainingEnv(gym.Env):
                 reward = 200  # 抓到真正的大突破，給予獎賞
             else:
                 reward = -80  # 價格沒拉開，在盤整區回報，處罰
+                
+        elif action == 1:
+            reward = 0
+                
         elif action == 0:
             if is_valuable_move:
                 reward = -150 # 漏報真正的大波動，大罰
