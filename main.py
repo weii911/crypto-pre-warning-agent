@@ -79,13 +79,20 @@ if __name__ == "__main__":
                     f"（請根據分析，為交易員親自撰寫一句話的最終指導，字數40字內，必須明確指出是開多、看空防範、還是空倉觀望。）"
                  )
                 
-                llm_response = tools.call_local_ollama(
-                    coin_name=f"{ticker} ({market_dir}) -> {prompt_injection}", 
-                    oi_rate=current_data['oi_rate'], 
-                    volume_pump=current_data['volume_pump'],
-                    price_position=current_data['price_position'],
-                    orderbook_delta=current_data['orderbook_delta']
-                )
+                try:
+                    llm_response = tools.call_local_ollama(
+                        coin_name=f"{ticker} ({market_dir}) -> {prompt_injection}", 
+                        oi_rate=current_data['oi_rate'], 
+                        volume_pump=current_data['volume_pump'],
+                        price_position=current_data['price_position'],
+                        orderbook_delta=current_data['orderbook_delta']
+                    )
+                    if not llm_response or not llm_response.strip():
+                        raise Exception("Ollama 斷訊或回傳空字串")
+                        
+                except Exception as e:
+                    print(f"⚠️ 觸發第三層防禦網：{e}")
+                    llm_response = "[微觀資金診斷]\n本地 AI 推理設備高負載超時斷訊，啟動風控保底機制。\n\n[行動指導結論]\n市場波動劇烈且硬體超載，建議【空倉觀望】。"
                 
                 raw_lines = [line.strip() for line in llm_response.strip().split('\n') if line.strip()]
                 
@@ -136,9 +143,7 @@ if __name__ == "__main__":
                 print(f"已發送 {total_alerts_sent} 份訊息")
                 print("-" * 80)
                 
-                if total_alerts_sent >= 40:
-                    print("\n💡 [安全防禦機制] 已達到最大通報上限，系統安全關閉。")
-                    break
+                
                 
                 time.sleep(0.5)  
             

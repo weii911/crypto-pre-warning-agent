@@ -123,13 +123,20 @@ if __name__ == "__main__":
                 f"（請根據分析，為交易員親自撰寫一句話的最終指導，字數40字內，必須明確指出是開多、看空防範、還是空倉觀望。）"
             )
             
-            llm_response = tools.call_local_ollama(
-                coin_name=f"{ticker} ({live_data['direction']}) -> {prompt_injection}", 
-                oi_rate=live_data['oi_rate'], 
-                volume_pump=live_data['volume_pump'],
-                price_position=live_data['price_position'],
-                orderbook_delta=live_data['orderbook_delta']
-            )
+            try:
+                llm_response = tools.call_local_ollama(
+                    coin_name=f"{ticker} ({live_data['direction']}) -> {prompt_injection}", 
+                    oi_rate=live_data['oi_rate'], 
+                    volume_pump=live_data['volume_pump'],
+                    price_position=live_data['price_position'],
+                    orderbook_delta=live_data['orderbook_delta']
+                )
+                if not llm_response or not llm_response.strip():
+                    raise Exception("Ollama 實時推理斷訊或回傳空字串")
+                    
+            except Exception as e:
+                print(f"⚠️ 觸發實時第三層防禦網：{e}")
+                llm_response = "[微觀資金診斷]\n實時生產環境之本地 AI 推理設備高負載超時斷訊，啟動風控保底機制。\n\n[行動指導結論]\n當前市場波動劇烈且硬體超載，建議立即執行【空倉觀望】確保本金安全。"
             
             raw_lines = [line.strip() for line in llm_response.strip().split('\n') if line.strip()]
             conclusion_idx = -1
